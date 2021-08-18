@@ -61,12 +61,10 @@
               </el-date-picker>
             </el-form-item>
           </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
+          <el-col :span="9">
             <el-form-item label="搜索内容">
               <el-input
-                style="width: 550px"
+                style="width: 200px"
                 v-model="form.content"
                 placeholder="请输入查询内容"
               ></el-input>
@@ -77,6 +75,9 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <!-- <el-row>
+
+        </el-row> -->
       </el-form>
       <el-table :data="tableData" style="width: 100%">
         <el-table-column
