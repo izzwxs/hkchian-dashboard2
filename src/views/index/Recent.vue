@@ -30,7 +30,7 @@
     <el-dialog :visible="visiable" @close="visiable = false" width="90%">
       <el-form :inline="true" :model="form" size="mini">
         <el-row>
-          <el-col :span="6">
+          <el-col :span="5">
             <el-form-item label="节点">
               <el-select v-model="form.node" placeholder="请选择节点">
                 <el-option
@@ -42,15 +42,15 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="6">
+          <!-- <el-col :span="6">
             <el-form-item label="状态">
               <el-input
                 v-model="form.state"
                 placeholder="请输入状态"
               ></el-input>
             </el-form-item>
-          </el-col>
-          <el-col :span="12">
+          </el-col> -->
+          <el-col :span="10">
             <el-form-item label="选择时间">
               <el-date-picker
                 v-model="form.date"
@@ -66,7 +66,7 @@
           <el-col :span="24">
             <el-form-item label="搜索内容">
               <el-input
-                style="width: 530px"
+                style="width: 550px"
                 v-model="form.content"
                 placeholder="请输入查询内容"
               ></el-input>
