@@ -32,7 +32,7 @@
         <el-row>
           <el-col :span="5">
             <el-form-item label="节点">
-              <el-select v-model="form.node" placeholder="请选择节点">
+              <el-select v-model="form.node" placeholder="请选择节点" :clearable="true">
                 <el-option
                   v-for="item in nodes"
                   :key="item.uuid"
