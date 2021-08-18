@@ -35,10 +35,16 @@ import * as echarts from 'echarts'
 
 const xAxis = []
 const data = []
+const data2 = []
+const dataHl = []
+const dataDj = []
 
 for (let i = 11; i >= 0; --i) {
   xAxis.push(dayjs().subtract(i, 'month').format('YYYY-MM'))
-  data.push(Math.floor(50 + 30 * Math.random()))
+  data.push(Math.floor(2 + 2 * Math.random()))
+  data2.push(Math.floor(10 + 4 * Math.random()))
+  dataHl.push(2)
+  dataDj.push(1)
 }
 
 const commonOptions = {
@@ -110,19 +116,19 @@ export default {
   name: 'Lines', // 折线图
   data () {
     return {
-      jkdsj: 78,
-      hl: 78,
-      wzyzq: 78,
-      zz: 78,
-      djyzq: 78
+      jkdsj: 15,
+      hl: 2,
+      wzyzq: 4,
+      zz: 15,
+      djyzq: 1
     }
   },
   mounted () {
-    this.render('jkdsj', map.jkdsj, data)
-    this.render('hl', map.hl, data)
+    this.render('jkdsj', map.jkdsj, data2)
+    this.render('hl', map.hl, dataHl)
     this.render('wzyzq', map.wzyzq, data)
-    this.render('zz', map.zz, data)
-    this.render('djyzq', map.djyzq, data)
+    this.render('zz', map.zz, data2)
+    this.render('djyzq', map.djyzq, dataDj)
   },
   methods: {
     render (ref, name, data) {
@@ -161,11 +167,11 @@ export default {
       })
 
       chart.on('mouseout', function (params) {
-        _this.jkdsj = 78
-        _this.hl = 78
-        _this.wzyzq = 78
-        _this.zz = 78
-        _this.djyzq = 78
+        _this.jkdsj = 15
+        _this.hl = 2
+        _this.wzyzq = 4
+        _this.zz = 15
+        _this.djyzq = 1
       })
     }
   }

@@ -29,15 +29,25 @@
     </table>
     <el-dialog :visible="visiable" @close="visiable = false" width="90%">
       <el-form :inline="true" :model="form" size="mini">
-        <!-- <el-row>
+        <el-row>
           <el-col :span="6">
             <el-form-item label="节点">
-              <el-select v-model="form.node" placeholder="请选择节点"></el-select>
+              <el-select v-model="form.node" placeholder="请选择节点">
+                <el-option
+                  v-for="item in nodes"
+                  :key="item.uuid"
+                  :label="item.name"
+                  :value="item.name">
+                </el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="状态">
-              <el-select v-model="form.status" placeholder="请选择状态"></el-select>
+              <el-input
+                v-model="form.state"
+                placeholder="请输入状态"
+              ></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -51,19 +61,19 @@
               </el-date-picker>
             </el-form-item>
           </el-col>
-        </el-row> -->
+        </el-row>
         <el-row>
           <el-col :span="24">
             <el-form-item label="搜索内容">
               <el-input
                 style="width: 530px"
                 v-model="form.content"
-                placeholder="请输入区块链地址、hash、用户名查询"
+                placeholder="请输入查询内容"
               ></el-input>
               <el-button type="primary" style="margin-left: 10px" @click="onSubmit"
                 >查询</el-button
               >
-              <el-button type="defalut">导出</el-button>
+              <!-- <el-button type="defalut">导出</el-button> -->
             </el-form-item>
           </el-col>
         </el-row>
@@ -73,7 +83,7 @@
           prop="address"
           label="区块链账户"
           :show-overflow-tooltip="true"
-          width="180"
+          width="160"
         >
         </el-table-column>
         <el-table-column prop="record" label="日志描述"> </el-table-column>
@@ -81,7 +91,9 @@
         </el-table-column>
         <!-- <el-table-column prop="name" label="用户名" width="120">
         </el-table-column> -->
-        <el-table-column prop="from_node" label="所属节点" width="180">
+        <el-table-column prop="from_node" label="所属节点" width="190">
+        </el-table-column>
+        <el-table-column prop="to_node" label="目标节点" width="190">
         </el-table-column>
         <el-table-column label="时间" width="180">
           <template slot-scope="scope">
@@ -90,7 +102,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination background layout="prev, pager, next" :total="total" :page-size="page_size" @current-change="handlePageChange">
+      <el-pagination background layout="prev, pager, next" :total="total" :current-page="currentPage" :page-size="page_size" @current-change="handlePageChange">
       </el-pagination>
     </el-dialog>
   </div>
@@ -109,9 +121,10 @@ import {
   TableColumn,
   Row,
   Col,
-  Pagination
+  Pagination,
+  Option
 } from 'element-ui'
-import { getLogs } from '@/api/index'
+import { getLogs, getNodes } from '@/api/index'
 import { LOGS } from '@/constant/localStorage'
 import * as dayjs from 'dayjs'
 
@@ -131,14 +144,16 @@ export default {
   data () {
     return {
       data: [],
+      nodes: [],
       visiable: false,
       total: 0,
+      currentPage: 1,
       page_size: 5,
       head: ['账户', '操作', '区块链凭证', '时间'],
       form: {
-        // node: '',
-        // status: '',
-        // date: '',
+        node: '',
+        state: '',
+        date: '',
         content: ''
       },
       tableData: []
@@ -156,7 +171,8 @@ export default {
     [TableColumn.name]: TableColumn,
     [Row.name]: Row,
     [Col.name]: Col,
-    [Pagination.name]: Pagination
+    [Pagination.name]: Pagination,
+    [Option.name]: Option
   },
   mounted () {
     const heightEl = this.$el.clientHeight
@@ -168,7 +184,11 @@ export default {
     setInterval(() => {
       this.getGetLogs()
     }, 1000)
-    this.renderTable(1)
+    this.renderTable({
+      page: 1,
+      page_size: this.page_size
+    })
+    this.setNode()
   },
   methods: {
     // 查看更多
@@ -218,29 +238,61 @@ export default {
       return dayjs(date).format(exp)
     },
     onSubmit () {
-      getLogs({
-        // state: this.form.content,
+      let startTime = ''
+      let endTime = ''
+
+      if (this.form.date.length > 0) {
+        startTime = this.formatTime(this.form.date[0], 'YYYY-MM-DD HH:mm:ss')
+        endTime = this.formatTime(this.form.date[1], 'YYYY-MM-DD HH:mm:ss')
+      }
+
+      const params = {
+        node: this.form.node,
+        state: this.form.state,
         record: this.form.content,
-        page: 1,
+        start_time: startTime,
+        end_time: endTime,
+        page: this.currentPage,
         page_size: this.page_size
-      })
+      }
+
+      getLogs(params)
         .then(res => {
           this.tableData = res.results
           this.total = res.count
         })
     },
-    renderTable (page) {
-      getLogs({
-        page,
-        page_size: this.page_size
-      })
+    renderTable (params) {
+      getLogs(params)
         .then(res => {
           this.tableData = res.results
           this.total = res.count
         })
     },
     handlePageChange (current) {
-      this.renderTable(current)
+      let startTime = ''
+      let endTime = ''
+      this.currentPage = current
+
+      if (this.form.date.length > 0) {
+        startTime = this.formatTime(this.form.date[0], 'YYYY-MM-DD HH:mm:ss')
+        endTime = this.formatTime(this.form.date[1], 'YYYY-MM-DD HH:mm:ss')
+      }
+      const params = {
+        node: this.form.node,
+        state: this.form.state,
+        record: this.form.content,
+        start_time: startTime,
+        end_time: endTime,
+        page: current,
+        page_size: this.page_size
+      }
+
+      this.renderTable(params)
+    },
+    async setNode () {
+      const nodes = await getNodes()
+      this.nodes = nodes
     }
   }
 }
@@ -273,7 +325,7 @@ export default {
     table-layout: fixed;
 
     .thead {
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .tbody {

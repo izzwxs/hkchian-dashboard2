@@ -4,7 +4,7 @@ import { Message } from 'element-ui'
 const instance = axios.create({
   baseURL: 'https://dcd.huxleymedical.tech/dj/api/v1.0',
   // baseURL: process.env.VUE_APP_HTTP_URL,
-  timeout: 60000
+  timeout: 600000
 })
 
 // 添加响应拦截器
