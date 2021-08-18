@@ -1,6 +1,8 @@
 <template>
   <div class="recent">
-    <div class="title">日志 <span class="more" @click="visiable = true">查看更多</span></div>
+    <div class="title">
+      日志 <span class="more" @click="visiable = true">查看更多 ≫</span>
+    </div>
     <table class="table">
       <thead class="thead">
         <tr>
@@ -12,89 +14,115 @@
       </thead>
       <tbody ref="tbody" class="tbody">
         <tr v-for="(item, index) in data" :key="index">
-          <td class="blue">{{ item.account }}</td>
-          <td width="46%">{{ item.option }}</td>
-          <td width="24%">
+          <td :title="item.address">
+            <div class="link blue">{{ item.address }}</div>
+          </td>
+          <td width="44%" class="break-word">{{ item.record }}</td>
+          <td width="22%" :title="item.transaction">
             <div class="link blue">
-              {{ item.link }}
+              {{ item.transaction }}
             </div>
           </td>
-          <td>{{ item.duration }}</td>
+          <td>{{ formatTime(item.created, 'HH:mm:ss') }}</td>
         </tr>
       </tbody>
     </table>
     <el-dialog :visible="visiable" @close="visiable = false" width="90%">
-      <el-form :inline="true" :model="form" size="small">
-        <el-row>
-          <el-col :span="8">
-            <el-form-item label="筛选节点">
+      <el-form :inline="true" :model="form" size="mini">
+        <!-- <el-row>
+          <el-col :span="6">
+            <el-form-item label="节点">
               <el-select v-model="form.node" placeholder="请选择节点"></el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="状态">
               <el-select v-model="form.status" placeholder="请选择状态"></el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="12">
             <el-form-item label="选择时间">
-              <el-select v-model="form.date" placeholder="请选择时间"></el-select>
+              <el-date-picker
+                v-model="form.date"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期">
+              </el-date-picker>
             </el-form-item>
           </el-col>
-        </el-row>
+        </el-row> -->
         <el-row>
-          <el-col :span="18">
+          <el-col :span="24">
             <el-form-item label="搜索内容">
-              <el-input style="width: 500px" v-model="form.content" placeholder="请输入区块链地址、hash、用户名查询"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="6">
-            <el-form-item>
-              <el-button type="primary">查询</el-button>
+              <el-input
+                style="width: 530px"
+                v-model="form.content"
+                placeholder="请输入区块链地址、hash、用户名查询"
+              ></el-input>
+              <el-button type="primary" style="margin-left: 10px" @click="onSubmit"
+                >查询</el-button
+              >
               <el-button type="defalut">导出</el-button>
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
-      <el-table
-        :data="tableData"
-        style="width: 100%">
+      <el-table :data="tableData" style="width: 100%">
         <el-table-column
-          prop="date"
-          label="时间"
-          width="180">
-        </el-table-column>
-        <el-table-column
-          prop="account"
+          prop="address"
           label="区块链账户"
           :show-overflow-tooltip="true"
-          width="180">
+          width="180"
+        >
         </el-table-column>
-        <el-table-column
-          prop="desc"
-          label="日志描述">
+        <el-table-column prop="record" label="日志描述"> </el-table-column>
+        <el-table-column prop="transaction" :show-overflow-tooltip="true" label="hash">
         </el-table-column>
-        <el-table-column
-          prop="node"
-          label="所属节点"
-          width="180">
+        <!-- <el-table-column prop="name" label="用户名" width="120">
+        </el-table-column> -->
+        <el-table-column prop="from_node" label="所属节点" width="180">
+        </el-table-column>
+        <el-table-column label="时间" width="180">
+          <template slot-scope="scope">
+            <i class="el-icon-time"></i>
+            <span style="margin-left: 10px">{{ formatTime(scope.row.created, 'YYYY-MM-DD HH:mm:ss') }}</span>
+          </template>
         </el-table-column>
       </el-table>
+      <el-pagination background layout="prev, pager, next" :total="total" :page-size="page_size" @current-change="handlePageChange">
+      </el-pagination>
     </el-dialog>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import { Dialog, Table, Select, Input, Form, FormItem, DatePicker, Button, TableColumn, Row, Col } from 'element-ui'
+import {
+  Dialog,
+  Table,
+  Select,
+  Input,
+  Form,
+  FormItem,
+  DatePicker,
+  Button,
+  TableColumn,
+  Row,
+  Col,
+  Pagination
+} from 'element-ui'
+import { getLogs } from '@/api/index'
+import { LOGS } from '@/constant/localStorage'
+import * as dayjs from 'dayjs'
 
 const data = []
 
-for (let i = 0; i < 20; ++i) {
+for (let i = 0; i < 30; ++i) {
   data.push({
     account: 'G3FF',
-    option: '齐鲁儿童医院2021.08.13 20:29:17 登录成功',
+    option: '齐鲁儿童医院登录成功',
     link: 'udai202108313fhsaldjkfhsajkdfhkjlhsdlfajhudai202108313fhsaldjkfhsajkdfhkjlhsdlfajh',
-    duration: '2s'
+    duration: '09:29:17'
   })
 }
 
@@ -102,47 +130,18 @@ export default {
   name: 'Recent', // 近期操作
   data () {
     return {
-      data,
+      data: [],
       visiable: false,
+      total: 0,
+      page_size: 5,
       head: ['账户', '操作', '区块链凭证', '时间'],
       form: {
-        node: '',
-        status: '',
-        date: '',
+        // node: '',
+        // status: '',
+        // date: '',
         content: ''
       },
-      tableData: [
-        {
-          date: '2016-05-02',
-          account: 'FDHJKDSJFKHSDFJKHSDFKLSDHFLKSJDHF',
-          desc: '数据hash上链',
-          node: '四川协作中心'
-        },
-        {
-          date: '2016-05-02',
-          account: 'FDHJKDSJFKHSDFJKHSDFKLSDHFLKSJDHF',
-          desc: '数据hash上链',
-          node: '四川协作中心'
-        },
-        {
-          date: '2016-05-02',
-          account: 'FDHJKDSJFKHSDFJKHSDFKLSDHFLKSJDHF',
-          desc: '数据hash上链',
-          node: '四川协作中心'
-        },
-        {
-          date: '2016-05-02',
-          account: 'FDHJKDSJFKHSDFJKHSDFKLSDHFLKSJDHF',
-          desc: '数据hash上链',
-          node: '四川协作中心'
-        },
-        {
-          date: '2016-05-02',
-          account: 'FDHJKDSJFKHSDFJKHSDFKLSDHFLKSJDHF',
-          desc: '数据hash上链',
-          node: '四川协作中心'
-        }
-      ]
+      tableData: []
     }
   },
   components: {
@@ -156,18 +155,92 @@ export default {
     [FormItem.name]: FormItem,
     [TableColumn.name]: TableColumn,
     [Row.name]: Row,
-    [Col.name]: Col
+    [Col.name]: Col,
+    [Pagination.name]: Pagination
   },
   mounted () {
     const heightEl = this.$el.clientHeight
     const heightThead = document.querySelector('.thead').clientHeight
     const heightTitle = document.querySelector('.title').clientHeight
-    this.$refs.tbody.style.height = (heightEl - heightThead - heightTitle - 10) + 'px'
+    this.$refs.tbody.style.height =
+      heightEl - heightThead - heightTitle - 10 + 'px'
+
+    setInterval(() => {
+      this.getGetLogs()
+    }, 1000)
+    this.renderTable(1)
   },
   methods: {
     // 查看更多
     handleMore () {
       this.visiable = true
+    },
+    getGetLogs () {
+      getLogs().then(async (res) => {
+        this.data = res.results
+        const { results } = res
+        // 获取本地缓存记录
+        const localLogs = localStorage.getItem(LOGS)
+          ? JSON.parse(localStorage.getItem(LOGS))
+          : []
+        const newLogs = []
+
+        // 遍历比对缓存记录
+        for (let i = 0; i < results.length; ++i) {
+          const current = results[i]
+          if (localLogs.length > 0) {
+            let flag = 0
+            for (let j = 0; j < localLogs.length; ++j) {
+              const _current = localLogs[j]
+              if (current.uuid === _current.uuid) {
+                flag = 1
+                break
+              }
+            }
+            if (flag === 0 && current.from_node && current.to_node) {
+              localLogs.push(current)
+              newLogs.push(current)
+            }
+          } else {
+            if (current.from_node && current.to_node) {
+              localLogs.push(current)
+              newLogs.push(current)
+            }
+          }
+        }
+        if (newLogs.length > 0) {
+          this.$bus.$emit('update', newLogs)
+        }
+        localStorage.setItem(LOGS, JSON.stringify(localLogs))
+      })
+    },
+    formatTime (date, exp) {
+      return dayjs(date).format(exp)
+    },
+    onSubmit () {
+      getLogs({
+        // state: this.form.content,
+        record: this.form.content,
+        page: 1,
+        page_size: this.page_size
+      })
+        .then(res => {
+          this.tableData = res.results
+          this.total = res.count
+        })
+    },
+    renderTable (page) {
+      getLogs({
+        page,
+        page_size: this.page_size
+      })
+        .then(res => {
+          this.tableData = res.results
+          this.total = res.count
+        })
+    },
+    handlePageChange (current) {
+      this.renderTable(current)
     }
   }
 }
@@ -176,8 +249,8 @@ export default {
 <style lang="scss" scoped>
 /* 滚动条宽度 */
 ::-webkit-scrollbar {
-    width: 0px;
-    background-color: transparent;
+  width: 0px;
+  background-color: transparent;
 }
 
 .recent {
@@ -210,12 +283,12 @@ export default {
       font-size: 12px;
 
       .link {
-        word-wrap:break-word;
-        word-break:break-all;
+        word-wrap: break-word;
+        word-break: break-all;
         overflow: hidden;
         display: -webkit-box;
         -webkit-line-clamp: 1; //多行在这里修改数字即可
-        overflow:hidden;
+        overflow: hidden;
         /* autoprefixer: ignore next */
         -webkit-box-orient: vertical;
       }
@@ -223,12 +296,16 @@ export default {
       .blue {
         color: #2e5dfc;
       }
+
+      .break-word {
+        word-wrap: break-word;
+      }
     }
 
     tr {
       display: table;
       width: 100%;
-      table-layout:fixed;
+      table-layout: fixed;
     }
   }
 
@@ -240,7 +317,7 @@ export default {
     width: 80vw;
     max-width: 1200px;
     height: 80vh;
-    background: rgba(0, 0, 0, .5);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 999;
     border-radius: 4px;
   }

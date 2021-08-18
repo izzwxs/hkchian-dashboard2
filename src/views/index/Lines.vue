@@ -3,27 +3,27 @@
     <!-- 健康大数据节点 -->
     <div class="chart-container card">
       <h3 class="chart-title">健康大数据节点 <span class="tips"></span></h3>
-      <div class="value">78</div>
+      <div class="value">{{ jkdsj }}</div>
       <div class="chart" ref="jkdsj"></div>
     </div>
     <div class="chart-container card">
       <h3 class="chart-title">华链节点 <span class="tips"></span></h3>
-      <div class="value">78</div>
+      <div class="value">{{ hl }}</div>
       <div class="chart" ref="hl"></div>
     </div>
     <div class="chart-container card">
       <h3 class="chart-title">完整验证器 <span class="tips"></span></h3>
-      <div class="value">78</div>
+      <div class="value">{{ wzyzq }}</div>
       <div class="chart" ref="wzyzq"></div>
     </div>
     <div class="chart-container card">
       <h3 class="chart-title">组织 <span class="tips"></span></h3>
-      <div class="value">78</div>
+      <div class="value">{{ zz }}</div>
       <div class="chart" ref="zz"></div>
     </div>
     <div class="chart-container card">
       <h3 class="chart-title">顶级验证器 <span class="tips"></span></h3>
-      <div class="value">78</div>
+      <div class="value">{{ djyzq }}</div>
       <div class="chart" ref="djyzq"></div>
     </div>
   </div>
@@ -98,14 +98,31 @@ const commonSeriesOptions = {
   }
 }
 
+const map = {
+  jkdsj: '健康大数据节点',
+  hl: '华链节点',
+  wzyzq: '完整验证器',
+  zz: '组织',
+  djyzq: '顶级验证器'
+}
+
 export default {
   name: 'Lines', // 折线图
+  data () {
+    return {
+      jkdsj: 78,
+      hl: 78,
+      wzyzq: 78,
+      zz: 78,
+      djyzq: 78
+    }
+  },
   mounted () {
-    this.render('jkdsj', '健康大数据节点', data)
-    this.render('hl', '健康大数据节点', data)
-    this.render('wzyzq', '健康大数据节点', data)
-    this.render('zz', '健康大数据节点', data)
-    this.render('djyzq', '健康大数据节点', data)
+    this.render('jkdsj', map.jkdsj, data)
+    this.render('hl', map.hl, data)
+    this.render('wzyzq', map.wzyzq, data)
+    this.render('zz', map.zz, data)
+    this.render('djyzq', map.djyzq, data)
   },
   methods: {
     render (ref, name, data) {
@@ -119,6 +136,36 @@ export default {
             data
           }
         ]
+      })
+
+      const _this = this
+      chart.on('mousemove', function (params) {
+        const { seriesName, data } = params
+        switch (seriesName) {
+          case map.jkdsj:
+            _this.jkdsj = data
+            break
+          case map.hl:
+            _this.hl = data
+            break
+          case map.wzyzq:
+            _this.wzyzq = data
+            break
+          case map.zz:
+            _this.zz = data
+            break
+          case map.djyzq:
+            _this.djyzq = data
+            break
+        }
+      })
+
+      chart.on('mouseout', function (params) {
+        _this.jkdsj = 78
+        _this.hl = 78
+        _this.wzyzq = 78
+        _this.zz = 78
+        _this.djyzq = 78
       })
     }
   }

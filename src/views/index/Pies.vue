@@ -17,7 +17,8 @@ const commonOptions = {
       orient: 'vertical',
       itemGap: 10
     },
-    color: ['#2E5DFC', '#63b931', '#ffc952', '#dcdcdc']
+    color: ['#2E5DFC', '#63b931', '#ffc952', '#dcdcdc'],
+    tooltip: {}
   },
   series: {
     type: 'pie',

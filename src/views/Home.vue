@@ -79,5 +79,4 @@ $gutter: 10px;
     }
   }
 }
-
 </style>
