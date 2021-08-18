@@ -58,7 +58,7 @@ export default {
             })
             console.log(series)
             clearTimeout(sto)
-          }, 1000)
+          }, 5000)
         }
       }, 100)
     })
